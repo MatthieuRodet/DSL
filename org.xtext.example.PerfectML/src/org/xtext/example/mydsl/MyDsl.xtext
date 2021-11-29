@@ -1,0 +1,64 @@
+grammar org.xtext.example.perfectML.PerfectML with org.eclipse.xtext.common.Terminals
+
+generate perfectML "http://www.xtext.org/example/perfectML/perfectML"
+
+Program:
+	blocsFile = File
+	blocsAlgo = Algorithm
+	blocsPara = ParameterDeclaration
+	blocsColu = ColumnDeclarations
+;
+
+File :
+	'Use source data :' PATH=STRING '\n'
+;
+
+Algorithm :
+	{Algorithm} 'Use algorithm' Name = ID 'with\n' (Bloc+=AlgoDeclaration '\n')*
+;
+
+ParameterDeclaration :
+	{ParameterDeclaration} 'Use parameters :\n' (Bloc+=ParaDeclaration '\n')*
+;
+
+ColumnDeclarations :
+	{ColumnDeclarations} 'Use columns :\n' (Bloc+=ColumnDeclaration '\n')*
+;
+
+AlgoDeclaration :
+	Name=ID 'as' Value=Value
+;
+
+ParaDeclaration :
+	Name=ID 'values' Value=Value
+;
+
+ColumnDeclaration :
+	Columns = ColumnSet 'as' Type=TargetPredictive
+;
+
+ColumnSet :
+	'(' ArgBin1=ColumnSet ')' opType = Binop '(' ArgBin2=ColumnSet ')'
+	|'From' ArgR1=INT 'to' ArgR2=INT
+	|'[' (ArgList+=INT ',')* ArgList+=INT ']'
+;
+
+Binop :
+	type = 'and' | type = 'except'
+;
+
+TargetPredictive :
+	type = "target" | type = "predictive"
+;
+
+Value :
+	int=INT | str=STRING | float=FLOAT | bool=BOOL
+;
+
+FLOAT :
+	IntPart=INT '.' DecPart=INT
+;
+
+BOOL :
+	value = "true" | value = "false"
+;

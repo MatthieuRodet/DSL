@@ -1,0 +1,135 @@
+grammar org.xtext.example.perfectML.PerfectML with org.eclipse.xtext.common.Terminals
+
+generate perfectML "http://www.xtext.org/example/perfectML/PerfectML"
+
+
+PerfectMLFile: 
+    (programs += Program ';')+
+;
+
+Program:
+    input = Input
+    output = Output
+    algo = Algorithm
+    nbtraining = TrainingAmount
+    (column = ColumnDeclarations)?
+;
+
+Input :
+    'Use' 'source' 'data' ':' PATH=STRING 
+;
+
+Output :
+    'Use' 'output' 'file' ':' PATH=STRING 
+;
+
+Algorithm :
+    'Use' (MLPClassifier
+    | SVC
+    | KNeighborsClassifier)
+//    | {Algorithm} 'Use algorithm' Name = ID ('with\n' (Bloc+=AlgoDeclaration )+)? ?
+    
+;
+
+MLPClassifier :
+    {MLPClassifier} 'MLPClassifier' 'with' 
+    (hidden_layer_sizes_def?='hidden_layer_sizes' '=' '(' hidden_layer_sizes += INT (',' hidden_layer_sizes += INT)* ')' )?
+    (activation_def?='activation' '=' activation = ('identity' | 'logistic' | 'tanh' | 'relu') )?
+    (solver_def?='solver' '=' solver = ('lbfgs' | 'sgd' | 'adam') )?
+    (alpha_def?='alpha' '=' alpha = FLOAT )?
+    (batch_size_def?='batch_size' '=' batch_size = INT )?
+    (learning_rate_def?='learning_rate' '=' learning_rate = ('constant' | 'invscaling' | 'adaptive') )?
+    (learning_rate_init_def?='learning_rate_init' '=' learning_rate_init = FLOAT )?
+    (power_t_def?='power_t' '=' power_t = FLOAT )?
+    (max_iteer_def?='max_iter' '=' max_iter = FLOAT )?
+    (shuffle_def?='shuffle' '=' shuffle = BOOL )?
+    (random_state_def?='random_state' '=' random_state = INT )?
+    (tolerance_def?='tolerance' '=' tolerance = FLOAT )?
+    (verbose_def?='verbose' '=' verbose = BOOL )?
+    (warm_start_def?='warm_start' '=' warm_start = BOOL )?
+    (momentum_def?='momentum' '=' momentum = FLOAT )?
+    (nesterovs_momentum_def?='nesterovs_momentum' '=' nesterovs_momentum = BOOL )?
+    (early_stopping_def?='early_stopping' '=' early_stopping = BOOL )?
+    (validation_fraction_def?='validation_fraction' '=' validation_fraction = FLOAT )?
+    (beta_1_def?='beta_1' '=' beta_1 = FLOAT )?
+    (beta_2_def?='beta_2' '=' beta_2 = FLOAT )?
+    (epsilon_def?='epsilon' '=' epsilon = FLOAT )?
+    (n_iter_no_change_def?='n_iter_no_change' '=' n_iter_no_change = INT )?
+    (max_fun_def?='max_fun' '=' max_fun = INT )?
+;
+
+SVC :
+    {SVC} 'SVC' 'with' 
+    (C_def?='C' '=' C=FLOAT )?
+    (kernel_def?='kernel' '=' kernel = ('rbf' | 'poly' | 'linear' | 'sigmoid' | 'precomputed') )?
+    (degree_def?='degree' '=' degree = INT )?
+    (gamma_def?='gamma' '=' gamma = ('scale' | 'auto') )?
+    (coef0_def?='coef0' '=' coef0 = FLOAT )?
+    (shrinking_def?='shrinking' '=' shrinking = BOOL )?
+    (probability_def?='probability' '=' probability = BOOL )?
+    (tol_def?='tolerance' '=' tol=FLOAT )?
+    (cache_size_def?='cache_size' '=' cache_size=FLOAT )?
+    (verbose_def?='verbose' '=' verbose=BOOL )?
+    (max_iter_def?='max_iter' '=' max_iter=INT )?
+    (decision_function_shape_def?='decision_function_shape' '=' decision_function_shape= ('ovo' | 'ovr') )?
+    (break_ties_def?='break_ties' '=' break_ties=BOOL )?
+    (random_state_def?='random_state' '=' random_state=INT )?
+;
+
+KNeighborsClassifier:
+    {KNeighborsClassifier} 'KNeighborsClassifier' 'with' 
+    (n_neighbors_def?='n_neighbors' '=' n_neighbors = INT )?
+    (weights_def?='weights' '=' weights = ('uniform' | 'distance') )?
+    (algorithm_def?='algorithm' '=' algorithm = ('auto' | 'ball_tree' | 'kd_tree' | 'brute') )?
+    (leaf_size_def?='leaf_size' '=' leaf_size = INT )?
+    (p_def?='p' '=' p = INT )?
+    (metric_def?='metric' '=' metric = ('mahalanobis' | 'seuclidean' | 'wminkowski' | 'minkowski' | 'chebyshev' | 'manhattan' | 'euclidean') )?
+    (n_jobs_def?='n_jobs' '=' n_jobs = INT )?
+;
+
+TrainingAmount :
+     'with' value=INT (percent?='%' | 'lines' 'of') 'training'  
+;
+
+ColumnDeclarations :
+    {ColumnDeclarations} 'Use' 'columns' ':' 
+    (target=ColumnSet 'as' target_def?='target' )
+    (predictive=ColumnSet 'as' pred_def?='predictive' )?
+;
+
+//AlgoDeclaration :
+//    Name=ID 'as' Value=Value
+//;
+//
+//ParaDeclaration :
+//    Name=ID 'values' Value=Value
+//;
+
+//ColumnDeclaration :
+//    Columns = ColumnSet 'as' Type=TargetPredictive
+//;
+
+ColumnSet :
+    op?='(' ArgBin1=ColumnSet ')' opType = Binop '(' ArgBin2=ColumnSet ')'
+    |range?='From' ArgR1=INT 'to' ArgR2=INT
+    |list?='[' (ArgList+=INT ',')* ArgList+=INT ']'
+;
+
+Binop :
+    type = 'and' | type = 'except'
+;
+//
+//TargetPredictive :
+//    type = "target" | type = "predictive"
+//;
+
+Value :
+    int=INT | str=STRING | float=FLOAT | bool=BOOL
+;
+
+FLOAT :
+    IntPart=INT '.' DecPart=INT
+;
+
+BOOL :
+    value = "True" | value = "False"
